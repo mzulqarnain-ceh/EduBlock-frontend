@@ -11,7 +11,6 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import Settings from './pages/Settings';
-import NotFound from './pages/NotFound';
 
 function App() {
   const [walletAddress, setWalletAddress] = useState('');
@@ -78,7 +77,6 @@ function App() {
           <Route path="/superadmin" element={<SuperAdminDashboard />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/contact" element={<ContactUs />} />
-          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Router>

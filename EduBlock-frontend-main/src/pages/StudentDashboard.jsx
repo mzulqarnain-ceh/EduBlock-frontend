@@ -4,26 +4,13 @@ import { QRCode } from 'react-qr-code';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { generateCertificatePDF } from '../utils/pdfGenerator';
-import { openTransactionInExplorer } from '../utils/blockchain';
 
 const StudentDashboard = () => {
     const [showQRModal, setShowQRModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
-    const [showDetailsModal, setShowDetailsModal] = useState(false);
-    const [showProfileModal, setShowProfileModal] = useState(false);
     const [selectedCert, setSelectedCert] = useState(null);
     const [user, setUser] = useState(null);
     const [notification, setNotification] = useState({ show: false, message: '' });
-    const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [sortBy, setSortBy] = useState('date-desc');
-    const [profileData, setProfileData] = useState({
-        name: '',
-        email: '',
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-    });
 
     // Get user from localStorage
     React.useEffect(() => {
@@ -36,54 +23,6 @@ const StudentDashboard = () => {
     const showNotification = (message) => {
         setNotification({ show: true, message });
         setTimeout(() => setNotification({ show: false, message: '' }), 3000);
-    };
-
-    const handleUpdateProfile = () => {
-        // Validation
-        if (!profileData.name.trim()) {
-            showNotification('Name cannot be empty');
-            return;
-        }
-        if (!profileData.email.trim()) {
-            showNotification('Email cannot be empty');
-            return;
-        }
-
-        // Password change validation
-        if (profileData.newPassword || profileData.confirmPassword) {
-            if (!profileData.currentPassword) {
-                showNotification('Please enter current password to set a new one');
-                return;
-            }
-            if (profileData.newPassword.length < 6) {
-                showNotification('New password must be at least 6 characters');
-                return;
-            }
-            if (profileData.newPassword !== profileData.confirmPassword) {
-                showNotification('New passwords do not match');
-                return;
-            }
-        }
-
-        // Update user in localStorage
-        const updatedUser = {
-            ...user,
-            name: profileData.name,
-            email: profileData.email,
-        };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        setUser(updatedUser);
-
-        // Clear password fields
-        setProfileData(prev => ({
-            ...prev,
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: ''
-        }));
-
-        showNotification('Profile updated successfully!');
-        setShowProfileModal(false);
     };
 
     // Mock certificates data with transaction details
@@ -126,30 +65,6 @@ const StudentDashboard = () => {
         },
     ];
 
-    // Filter and sort certificates
-    const filteredCertificates = certificates
-        .filter(cert => {
-            const matchesSearch =
-                cert.courseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                cert.institution.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesStatus = statusFilter === 'all' || cert.status === statusFilter;
-            return matchesSearch && matchesStatus;
-        })
-        .sort((a, b) => {
-            switch (sortBy) {
-                case 'date-desc':
-                    return new Date(b.issueDate) - new Date(a.issueDate);
-                case 'date-asc':
-                    return new Date(a.issueDate) - new Date(b.issueDate);
-                case 'name-asc':
-                    return a.courseName.localeCompare(b.courseName);
-                case 'name-desc':
-                    return b.courseName.localeCompare(a.courseName);
-                default:
-                    return 0;
-            }
-        });
-
     return (
         <div className="min-h-screen pt-32 pb-20">
             <div className="container-custom">
@@ -176,21 +91,6 @@ const StudentDashboard = () => {
                                 </h1>
                                 <p className="text-white/60">View and manage your earned certificates</p>
                             </div>
-                            <Button
-                                variant="secondary"
-                                onClick={() => {
-                                    setProfileData({
-                                        name: user?.name || '',
-                                        email: user?.email || '',
-                                        currentPassword: '',
-                                        newPassword: '',
-                                        confirmPassword: '',
-                                    });
-                                    setShowProfileModal(true);
-                                }}
-                            >
-                                👤 My Profile
-                            </Button>
                         </div>
                     </div>
 
@@ -231,41 +131,9 @@ const StudentDashboard = () => {
                         </Card>
                     </div>
 
-                    {/* Search and Filter */}
-                    <div className="flex flex-col md:flex-row gap-4 mb-8">
-                        <div className="flex-1">
-                            <input
-                                type="text"
-                                placeholder="🔍 Search by course name or institution..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="input-field w-full"
-                            />
-                        </div>
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="input-field w-full md:w-40"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="Issued">Issued</option>
-                            <option value="Pending">Pending</option>
-                        </select>
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="input-field w-full md:w-48"
-                        >
-                            <option value="date-desc">Newest First</option>
-                            <option value="date-asc">Oldest First</option>
-                            <option value="name-asc">Name A-Z</option>
-                            <option value="name-desc">Name Z-A</option>
-                        </select>
-                    </div>
-
                     {/* Certificates Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredCertificates.map((cert, index) => (
+                        {certificates.map((cert, index) => (
                             <motion.div
                                 key={cert.id}
                                 initial={{ opacity: 0, y: 20 }}
@@ -354,10 +222,10 @@ const StudentDashboard = () => {
                                             className="w-full"
                                             onClick={() => {
                                                 setSelectedCert(cert);
-                                                setShowDetailsModal(true);
+                                                setShowQRModal(true);
                                             }}
                                         >
-                                            👁️ View Details
+                                            View QR Code
                                         </Button>
                                         <div className="flex gap-2">
                                             <Button
@@ -393,14 +261,6 @@ const StudentDashboard = () => {
                                             >
                                                 📋 Copy
                                             </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="flex-1"
-                                                onClick={() => openTransactionInExplorer(cert.txHash)}
-                                            >
-                                                🔗 Blockchain
-                                            </Button>
                                         </div>
                                     </div>
                                 </Card>
@@ -420,15 +280,11 @@ const StudentDashboard = () => {
 
             {/* QR Code Modal */}
             {showQRModal && selectedCert && (
-                <div
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                    onClick={() => setShowQRModal(false)}
-                >
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="max-w-md w-full"
-                        onClick={(e) => e.stopPropagation()}
                     >
                         <Card>
                             <div className="flex justify-between items-center mb-6">
@@ -470,7 +326,7 @@ const StudentDashboard = () => {
                                     className="w-full"
                                     onClick={() => {
                                         navigator.clipboard.writeText(`https://edublock.com/verify/${selectedCert.hash}`);
-                                        showNotification('Verification link copied!');
+                                        alert('Link copied to clipboard!');
                                     }}
                                 >
                                     📋 Copy Verification Link
@@ -488,18 +344,13 @@ const StudentDashboard = () => {
                 </div>
             )}
 
-
             {/* Share Modal */}
             {showShareModal && selectedCert && (
-                <div
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                    onClick={() => setShowShareModal(false)}
-                >
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="max-w-md w-full"
-                        onClick={(e) => e.stopPropagation()}
                     >
                         <Card>
                             <div className="flex justify-between items-center mb-6">
@@ -596,119 +447,6 @@ const StudentDashboard = () => {
                 </div>
             )}
 
-            {/* Certificate Details Modal */}
-            {showDetailsModal && selectedCert && (
-                <div
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                    onClick={() => setShowDetailsModal(false)}
-                >
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <Card>
-                            <div className="flex justify-between items-start mb-6">
-                                <div>
-                                    <h2 className="text-2xl font-bold mb-1">{selectedCert.courseName}</h2>
-                                    <p className="text-white/60">{selectedCert.institution}</p>
-                                </div>
-                                <button
-                                    onClick={() => setShowDetailsModal(false)}
-                                    className="text-white/60 hover:text-white"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {/* Certificate Info */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                                        <span className="text-white/60">Student Name</span>
-                                        <span className="font-semibold">{selectedCert.studentName}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                                        <span className="text-white/60">Grade</span>
-                                        <span className="font-semibold text-amber-400">{selectedCert.grade}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                                        <span className="text-white/60">Issue Date</span>
-                                        <span className="font-semibold">{selectedCert.issueDate}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                                        <span className="text-white/60">Status</span>
-                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${selectedCert.status === 'Issued'
-                                            ? 'bg-green-500/20 text-green-400'
-                                            : 'bg-yellow-500/20 text-yellow-400'
-                                            }`}>
-                                            {selectedCert.status}
-                                        </span>
-                                    </div>
-                                    <div className="p-3 bg-white/5 rounded-lg">
-                                        <span className="text-white/60 text-sm">Certificate Hash</span>
-                                        <p className="font-mono text-xs text-blue-400 break-all mt-1">{selectedCert.hash}</p>
-                                    </div>
-                                    <div className="p-3 bg-white/5 rounded-lg">
-                                        <span className="text-white/60 text-sm">Transaction Hash</span>
-                                        <p className="font-mono text-xs text-blue-400 break-all mt-1">{selectedCert.txHash}</p>
-                                    </div>
-                                </div>
-
-                                {/* QR Code */}
-                                <div className="flex flex-col items-center justify-center">
-                                    <div className="bg-white p-4 rounded-xl mb-4">
-                                        <QRCode
-                                            value={`${window.location.origin}/verify?hash=${selectedCert.hash}`}
-                                            size={180}
-                                            level="H"
-                                        />
-                                    </div>
-                                    <p className="text-white/50 text-sm text-center">Scan to verify certificate</p>
-                                </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-                                <Button
-                                    variant="primary"
-                                    onClick={() => generateCertificatePDF(selectedCert)}
-                                >
-                                    📄 Download PDF
-                                </Button>
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => {
-                                        setShowDetailsModal(false);
-                                        setShowShareModal(true);
-                                    }}
-                                >
-                                    🔗 Share
-                                </Button>
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => openTransactionInExplorer(selectedCert.txHash)}
-                                >
-                                    ⛓️ Blockchain
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(selectedCert.hash);
-                                        showNotification('Certificate hash copied!');
-                                    }}
-                                >
-                                    📋 Copy Hash
-                                </Button>
-                            </div>
-                        </Card>
-                    </motion.div>
-                </div>
-            )}
-
             {/* Notification Toast */}
             {notification.show && (
                 <motion.div
@@ -725,117 +463,7 @@ const StudentDashboard = () => {
                     </div>
                 </motion.div>
             )}
-
-            {/* Profile Modal */}
-            {showProfileModal && (
-                <div
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                    onClick={() => setShowProfileModal(false)}
-                >
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="max-w-lg w-full max-h-[90vh] overflow-y-auto"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <Card>
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-bold">👤 My Profile</h2>
-                                <button
-                                    onClick={() => setShowProfileModal(false)}
-                                    className="text-white/60 hover:text-white"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {/* Profile Picture Section */}
-                            <div className="flex flex-col items-center mb-6">
-                                <div className="w-24 h-24 bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full flex items-center justify-center text-4xl mb-4">
-                                    {profileData.name ? profileData.name.charAt(0).toUpperCase() : '👤'}
-                                </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => showNotification('Photo upload feature coming soon!')}
-                                >
-                                    📷 Change Photo
-                                </Button>
-                            </div>
-
-                            {/* Profile Form */}
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-white/60 text-sm mb-1">Full Name</label>
-                                    <input
-                                        type="text"
-                                        value={profileData.name}
-                                        onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                                        className="input-field w-full"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-white/60 text-sm mb-1">Email</label>
-                                    <input
-                                        type="email"
-                                        value={profileData.email}
-                                        onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                                        className="input-field w-full"
-                                    />
-                                </div>
-
-                                <div className="border-t border-white/10 pt-4 mt-4">
-                                    <h3 className="font-semibold mb-3">🔐 Change Password</h3>
-                                    <div className="space-y-3">
-                                        <input
-                                            type="password"
-                                            placeholder="Current Password"
-                                            value={profileData.currentPassword}
-                                            onChange={(e) => setProfileData({ ...profileData, currentPassword: e.target.value })}
-                                            className="input-field w-full"
-                                        />
-                                        <input
-                                            type="password"
-                                            placeholder="New Password"
-                                            value={profileData.newPassword}
-                                            onChange={(e) => setProfileData({ ...profileData, newPassword: e.target.value })}
-                                            className="input-field w-full"
-                                        />
-                                        <input
-                                            type="password"
-                                            placeholder="Confirm New Password"
-                                            value={profileData.confirmPassword}
-                                            onChange={(e) => setProfileData({ ...profileData, confirmPassword: e.target.value })}
-                                            className="input-field w-full"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-3 mt-6">
-                                <Button
-                                    variant="primary"
-                                    className="flex-1"
-                                    onClick={handleUpdateProfile}
-                                >
-                                    💾 Save Changes
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setShowProfileModal(false)}
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
-                        </Card>
-                    </motion.div>
-                </div>
-            )
-            }
-        </div >
+        </div>
     );
 };
 

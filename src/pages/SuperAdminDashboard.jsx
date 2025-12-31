@@ -486,8 +486,8 @@ const SuperAdminDashboard = () => {
                                 <div className="flex items-center justify-between mb-6">
                                     <h2 className="text-2xl font-bold">🌐 Blockchain Network Status</h2>
                                     <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold ${blockchainSettings.connectionStatus === 'Connected'
-                                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                            : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                        : 'bg-red-500/20 text-red-400 border border-red-500/30'
                                         }`}>
                                         <span className={`w-2 h-2 rounded-full ${blockchainSettings.connectionStatus === 'Connected' ? 'bg-green-400 animate-pulse' : 'bg-red-400'
                                             }`}></span>
@@ -728,7 +728,7 @@ const SuperAdminDashboard = () => {
                                         <div key={idx} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                                             <div className="flex items-center gap-3">
                                                 <span className={`w-2 h-2 rounded-full ${item.type === 'success' ? 'bg-green-400' :
-                                                        item.type === 'warning' ? 'bg-orange-400' : 'bg-blue-400'
+                                                    item.type === 'warning' ? 'bg-orange-400' : 'bg-blue-400'
                                                     }`}></span>
                                                 <div>
                                                     <p className="font-semibold">{item.action}</p>
@@ -742,305 +742,305 @@ const SuperAdminDashboard = () => {
                             </Card>
                         </div>
                     )}
+
+                    {/* Add University Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="max-w-md w-full"
+                            >
+                                <Card>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-2xl font-bold">Add New University</h2>
+                                        <button
+                                            onClick={() => setShowAddModal(false)}
+                                            className="text-white/60 hover:text-white"
+                                        >
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <form onSubmit={handleAddUniversity} className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                University Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={newUniversity.name}
+                                                onChange={(e) => setNewUniversity({ ...newUniversity, name: e.target.value })}
+                                                placeholder="Enter university name"
+                                                className="input-field"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                Admin Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                value={newUniversity.email}
+                                                onChange={(e) => setNewUniversity({ ...newUniversity, email: e.target.value })}
+                                                placeholder="admin@university.edu"
+                                                className="input-field"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                Admin Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={newUniversity.adminName}
+                                                onChange={(e) => setNewUniversity({ ...newUniversity, adminName: e.target.value })}
+                                                placeholder="Enter admin name"
+                                                className="input-field"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                Default Password
+                                            </label>
+                                            <input
+                                                type="password"
+                                                value={newUniversity.password}
+                                                onChange={(e) => setNewUniversity({ ...newUniversity, password: e.target.value })}
+                                                placeholder="Set initial password"
+                                                className="input-field"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="flex gap-3 pt-4">
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                onClick={() => setShowAddModal(false)}
+                                                className="flex-1"
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit" variant="primary" className="flex-1">
+                                                Add University
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </Card>
+                            </motion.div>
+                        </div>
+                    )}
+
+                    {/* Edit University Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="max-w-md w-full"
+                            >
+                                <Card>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-2xl font-bold">Edit University</h2>
+                                        <button
+                                            onClick={() => setShowEditModal(false)}
+                                            className="text-white/60 hover:text-white"
+                                        >
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <form onSubmit={handleEditUniversity} className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                University Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editUniversity.name}
+                                                onChange={(e) => setEditUniversity({ ...editUniversity, name: e.target.value })}
+                                                placeholder="Enter university name"
+                                                className="input-field"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                Admin Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                value={editUniversity.email}
+                                                onChange={(e) => setEditUniversity({ ...editUniversity, email: e.target.value })}
+                                                placeholder="admin@university.edu"
+                                                className="input-field"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                Status
+                                            </label>
+                                            <select
+                                                value={editUniversity.status}
+                                                onChange={(e) => setEditUniversity({ ...editUniversity, status: e.target.value })}
+                                                className="input-field"
+                                            >
+                                                <option value="Active">Active</option>
+                                                <option value="Inactive">Inactive</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="flex gap-3 pt-4">
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                onClick={() => setShowEditModal(false)}
+                                                className="flex-1"
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit" variant="primary" className="flex-1">
+                                                Update University
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </Card>
+                            </motion.div>
+                        </div>
+                    )}
+
+                    {/* Assign Role Modal */}
+                    {showRoleModal && (
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="max-w-md w-full"
+                            >
+                                <Card>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-2xl font-bold">Assign User Role</h2>
+                                        <button
+                                            onClick={() => setShowRoleModal(false)}
+                                            className="text-white/60 hover:text-white"
+                                        >
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    {selectedUniversity && (
+                                        <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                                            <p className="text-sm text-blue-400">Assigning role for:</p>
+                                            <p className="font-semibold">{selectedUniversity.name}</p>
+                                        </div>
+                                    )}
+
+                                    <form onSubmit={handleAssignRole} className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                User Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={roleAssignment.userName}
+                                                onChange={(e) => setRoleAssignment({ ...roleAssignment, userName: e.target.value })}
+                                                placeholder="Enter user name"
+                                                className="input-field"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                User Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                value={roleAssignment.userEmail}
+                                                onChange={(e) => setRoleAssignment({ ...roleAssignment, userEmail: e.target.value })}
+                                                placeholder="user@example.com"
+                                                className="input-field"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                Assign Role
+                                            </label>
+                                            <select
+                                                value={roleAssignment.role}
+                                                onChange={(e) => setRoleAssignment({ ...roleAssignment, role: e.target.value })}
+                                                className="input-field"
+                                            >
+                                                <option value="viewer">Viewer (Read Only)</option>
+                                                <option value="issuer">Issuer (Can Issue Degrees)</option>
+                                                <option value="admin">Admin (Full Access)</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="flex gap-3 pt-4">
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                onClick={() => setShowRoleModal(false)}
+                                                className="flex-1"
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit" variant="primary" className="flex-1">
+                                                Assign Role
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </Card>
+                            </motion.div>
+                        </div>
+                    )}
+
+                    {/* Notification Toast */}
+                    {notification.show && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -50 }}
+                            className="fixed top-24 right-4 z-50"
+                        >
+                            <div className={`px-6 py-4 rounded-lg shadow-lg backdrop-blur-lg border ${notification.type === 'success'
+                                ? 'bg-green-500/20 border-green-500 text-green-400'
+                                : 'bg-red-500/20 border-red-500 text-red-400'
+                                } flex items-center gap-3`}>
+                                {notification.type === 'success' ? (
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                )}
+                                <span className="font-medium">{notification.message}</span>
+                            </div>
+                        </motion.div>
+                    )}
                 </motion.div>
             </div>
-
-            {/* Add University Modal */}
-            {showAddModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="max-w-md w-full"
-                    >
-                        <Card>
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-bold">Add New University</h2>
-                                <button
-                                    onClick={() => setShowAddModal(false)}
-                                    className="text-white/60 hover:text-white"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleAddUniversity} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-2 text-white/80">
-                                        University Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={newUniversity.name}
-                                        onChange={(e) => setNewUniversity({ ...newUniversity, name: e.target.value })}
-                                        placeholder="Enter university name"
-                                        className="input-field"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2 text-white/80">
-                                        Admin Email
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={newUniversity.email}
-                                        onChange={(e) => setNewUniversity({ ...newUniversity, email: e.target.value })}
-                                        placeholder="admin@university.edu"
-                                        className="input-field"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2 text-white/80">
-                                        Admin Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={newUniversity.adminName}
-                                        onChange={(e) => setNewUniversity({ ...newUniversity, adminName: e.target.value })}
-                                        placeholder="Enter admin name"
-                                        className="input-field"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2 text-white/80">
-                                        Default Password
-                                    </label>
-                                    <input
-                                        type="password"
-                                        value={newUniversity.password}
-                                        onChange={(e) => setNewUniversity({ ...newUniversity, password: e.target.value })}
-                                        placeholder="Set initial password"
-                                        className="input-field"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="flex gap-3 pt-4">
-                                    <Button
-                                        type="button"
-                                        variant="secondary"
-                                        onClick={() => setShowAddModal(false)}
-                                        className="flex-1"
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button type="submit" variant="primary" className="flex-1">
-                                        Add University
-                                    </Button>
-                                </div>
-                            </form>
-                        </Card>
-                    </motion.div>
-                </div>
-            )}
-
-            {/* Edit University Modal */}
-            {showEditModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="max-w-md w-full"
-                    >
-                        <Card>
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-bold">Edit University</h2>
-                                <button
-                                    onClick={() => setShowEditModal(false)}
-                                    className="text-white/60 hover:text-white"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleEditUniversity} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-2 text-white/80">
-                                        University Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={editUniversity.name}
-                                        onChange={(e) => setEditUniversity({ ...editUniversity, name: e.target.value })}
-                                        placeholder="Enter university name"
-                                        className="input-field"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2 text-white/80">
-                                        Admin Email
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={editUniversity.email}
-                                        onChange={(e) => setEditUniversity({ ...editUniversity, email: e.target.value })}
-                                        placeholder="admin@university.edu"
-                                        className="input-field"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2 text-white/80">
-                                        Status
-                                    </label>
-                                    <select
-                                        value={editUniversity.status}
-                                        onChange={(e) => setEditUniversity({ ...editUniversity, status: e.target.value })}
-                                        className="input-field"
-                                    >
-                                        <option value="Active">Active</option>
-                                        <option value="Inactive">Inactive</option>
-                                    </select>
-                                </div>
-
-                                <div className="flex gap-3 pt-4">
-                                    <Button
-                                        type="button"
-                                        variant="secondary"
-                                        onClick={() => setShowEditModal(false)}
-                                        className="flex-1"
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button type="submit" variant="primary" className="flex-1">
-                                        Update University
-                                    </Button>
-                                </div>
-                            </form>
-                        </Card>
-                    </motion.div>
-                </div>
-            )}
-
-            {/* Assign Role Modal */}
-            {showRoleModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="max-w-md w-full"
-                    >
-                        <Card>
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-bold">Assign User Role</h2>
-                                <button
-                                    onClick={() => setShowRoleModal(false)}
-                                    className="text-white/60 hover:text-white"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {selectedUniversity && (
-                                <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                                    <p className="text-sm text-blue-400">Assigning role for:</p>
-                                    <p className="font-semibold">{selectedUniversity.name}</p>
-                                </div>
-                            )}
-
-                            <form onSubmit={handleAssignRole} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-2 text-white/80">
-                                        User Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={roleAssignment.userName}
-                                        onChange={(e) => setRoleAssignment({ ...roleAssignment, userName: e.target.value })}
-                                        placeholder="Enter user name"
-                                        className="input-field"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2 text-white/80">
-                                        User Email
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={roleAssignment.userEmail}
-                                        onChange={(e) => setRoleAssignment({ ...roleAssignment, userEmail: e.target.value })}
-                                        placeholder="user@example.com"
-                                        className="input-field"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2 text-white/80">
-                                        Assign Role
-                                    </label>
-                                    <select
-                                        value={roleAssignment.role}
-                                        onChange={(e) => setRoleAssignment({ ...roleAssignment, role: e.target.value })}
-                                        className="input-field"
-                                    >
-                                        <option value="viewer">Viewer (Read Only)</option>
-                                        <option value="issuer">Issuer (Can Issue Degrees)</option>
-                                        <option value="admin">Admin (Full Access)</option>
-                                    </select>
-                                </div>
-
-                                <div className="flex gap-3 pt-4">
-                                    <Button
-                                        type="button"
-                                        variant="secondary"
-                                        onClick={() => setShowRoleModal(false)}
-                                        className="flex-1"
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button type="submit" variant="primary" className="flex-1">
-                                        Assign Role
-                                    </Button>
-                                </div>
-                            </form>
-                        </Card>
-                    </motion.div>
-                </div>
-            )}
-
-            {/* Notification Toast */}
-            {notification.show && (
-                <motion.div
-                    initial={{ opacity: 0, y: -50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -50 }}
-                    className="fixed top-24 right-4 z-50"
-                >
-                    <div className={`px-6 py-4 rounded-lg shadow-lg backdrop-blur-lg border ${notification.type === 'success'
-                        ? 'bg-green-500/20 border-green-500 text-green-400'
-                        : 'bg-red-500/20 border-red-500 text-red-400'
-                        } flex items-center gap-3`}>
-                        {notification.type === 'success' ? (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                        ) : (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        )}
-                        <span className="font-medium">{notification.message}</span>
-                    </div>
-                </motion.div>
-            )}
         </div>
     );
 };

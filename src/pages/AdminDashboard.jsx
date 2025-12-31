@@ -766,8 +766,8 @@ const AdminDashboard = () => {
                                         <div key={tx.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
                                             <div className="flex items-center gap-4">
                                                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${tx.status === 'Pending' ? 'bg-orange-500/20' :
-                                                        tx.status === 'Processing' ? 'bg-blue-500/20' :
-                                                            'bg-emerald-500/20'
+                                                    tx.status === 'Processing' ? 'bg-blue-500/20' :
+                                                        'bg-emerald-500/20'
                                                     }`}>
                                                     <span className="text-xl">
                                                         {tx.status === 'Pending' ? '⏳' :
@@ -781,8 +781,8 @@ const AdminDashboard = () => {
                                             </div>
                                             <div className="text-center">
                                                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${tx.status === 'Pending' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
-                                                        tx.status === 'Processing' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                                                            'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                                    tx.status === 'Processing' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                                                        'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                                     }`}>
                                                     {tx.status}
                                                 </span>
@@ -844,8 +844,8 @@ const AdminDashboard = () => {
                                     <div key={log.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
                                         <div className="flex items-center gap-4">
                                             <span className={`w-2 h-2 rounded-full ${log.type === 'success' ? 'bg-green-400' :
-                                                    log.type === 'warning' ? 'bg-orange-400' :
-                                                        'bg-blue-400'
+                                                log.type === 'warning' ? 'bg-orange-400' :
+                                                    'bg-blue-400'
                                                 }`}></span>
                                             <div>
                                                 <p className="font-semibold">{log.action}</p>
@@ -973,4 +973,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
