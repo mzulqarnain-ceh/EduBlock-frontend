@@ -247,6 +247,16 @@ const AdminDashboard = () => {
         setRevokeReason('');
     };
 
+    // Handle status change
+    const handleStatusChange = (certId, newStatus) => {
+        setIssuedCertificates(prev => prev.map(cert =>
+            cert.id === certId
+                ? { ...cert, status: newStatus }
+                : cert
+        ));
+        showNotification('success', `Certificate status changed to ${newStatus}.`);
+    };
+
     // Chart data
     const monthlyData = [
         { label: 'January', value: 45, color: '#fbbf24', colorEnd: '#f59e0b' },
@@ -709,7 +719,7 @@ const AdminDashboard = () => {
                                                     <p className="text-blue-400 font-mono text-xs">{shortenHash(cert.hash)}</p>
                                                 </td>
                                                 <td className="py-4 px-4">
-                                                    <div className="flex gap-2 justify-center">
+                                                    <div className="flex gap-2 justify-center flex-wrap">
                                                         <Button
                                                             variant="secondary"
                                                             size="sm"
@@ -717,6 +727,26 @@ const AdminDashboard = () => {
                                                         >
                                                             🔗 View
                                                         </Button>
+                                                        {cert.status !== 'Issued' && (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => handleStatusChange(cert.id, 'Issued')}
+                                                                className="border-green-500 text-green-400 hover:bg-green-500/10"
+                                                            >
+                                                                ✓ Issue
+                                                            </Button>
+                                                        )}
+                                                        {cert.status !== 'Pending' && cert.status !== 'Revoked' && (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => handleStatusChange(cert.id, 'Pending')}
+                                                                className="border-orange-500 text-orange-400 hover:bg-orange-500/10"
+                                                            >
+                                                                ⏳ Pending
+                                                            </Button>
+                                                        )}
                                                         {cert.status !== 'Revoked' && (
                                                             <Button
                                                                 variant="outline"
@@ -727,7 +757,7 @@ const AdminDashboard = () => {
                                                                 }}
                                                                 className="border-red-500 text-red-400 hover:bg-red-500/10"
                                                             >
-                                                                Revoke
+                                                                🚫 Revoke
                                                             </Button>
                                                         )}
                                                     </div>

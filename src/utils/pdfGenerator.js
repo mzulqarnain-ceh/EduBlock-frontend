@@ -1,180 +1,204 @@
 import jsPDF from 'jspdf';
 
 /**
- * Generate PDF Certificate
- * Flexible template that can be easily customized in the future
+ * Generate and Download PDF Certificate
+ * Creates a professional certificate PDF with proper filename
  * 
  * @param {Object} certificateData - Certificate details
  * @returns {void} - Triggers PDF download
  */
 export const generateCertificatePDF = (certificateData) => {
-    const {
-        studentName,
-        courseName,
-        institution,
-        grade,
-        issueDate,
-        hash,
-        txHash,
-        status,
-    } = certificateData;
-
-    // Create new PDF document (A4 size)
-    const doc = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-    });
-
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    // === HEADER SECTION ===
-    // Background gradient effect (simulated with rectangles)
-    doc.setFillColor(59, 130, 246); // Blue
-    doc.rect(0, 0, pageWidth, 40, 'F');
-
-    // Institution name
-    doc.setFontSize(24);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.text(institution || 'Educational Institution', pageWidth / 2, 20, { align: 'center' });
-
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Blockchain Verified Certificate', pageWidth / 2, 30, { align: 'center' });
-
-    // === CERTIFICATE TITLE ===
-    doc.setFontSize(32);
-    doc.setTextColor(59, 130, 246);
-    doc.setFont('helvetica', 'bold');
-    doc.text('CERTIFICATE', pageWidth / 2, 60, { align: 'center' });
-
-    doc.setFontSize(16);
-    doc.setTextColor(100, 100, 100);
-    doc.setFont('helvetica', 'normal');
-    doc.text('OF COMPLETION', pageWidth / 2, 70, { align: 'center' });
-
-    // === DECORATIVE LINE ===
-    doc.setDrawColor(59, 130, 246);
-    doc.setLineWidth(0.5);
-    doc.line(60, 75, pageWidth - 60, 75);
-
-    // === CERTIFICATE BODY ===
-    doc.setFontSize(14);
-    doc.setTextColor(50, 50, 50);
-    doc.setFont('helvetica', 'normal');
-    doc.text('This is to certify that', pageWidth / 2, 90, { align: 'center' });
-
-    // Student name (highlighted)
-    doc.setFontSize(22);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 0, 0);
-    doc.text(studentName || 'Student Name', pageWidth / 2, 105, { align: 'center' });
-
-    // Achievement text
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(50, 50, 50);
-    doc.text('has successfully completed', pageWidth / 2, 118, { align: 'center' });
-
-    // Course/Degree name
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(59, 130, 246);
-    doc.text(courseName || 'Course Name', pageWidth / 2, 130, { align: 'center' });
-
-    // === DETAILS BOX ===
-    const detailsY = 145;
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(70, 70, 70);
-
-    // Grade
-    doc.text(`Grade: ${grade || 'N/A'}`, 80, detailsY);
-
-    // Issue date
-    doc.text(`Issue Date: ${new Date(issueDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    })}`, 180, detailsY);
-
-    // Status badge
-    doc.setFillColor(status === 'Issued' ? 34 : 234, status === 'Issued' ? 197 : 179, status === 'Issued' ? 94 : 8);
-    doc.roundedRect(pageWidth - 65, detailsY - 5, 30, 8, 2, 2, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text(status || 'Issued', pageWidth - 50, detailsY, { align: 'center' });
-
-    // === BLOCKCHAIN VERIFICATION SECTION ===
-    const verificationY = 165;
-
-    // Section title
-    doc.setFontSize(12);
-    doc.setTextColor(59, 130, 246);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Blockchain Verification', pageWidth / 2, verificationY, { align: 'center' });
-
-    // Certificate hash
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.setFont('courier', 'normal');
-    const safeHash = hash || '0x0000000000000000000000000000000000000000';
-    const shortHash = `${safeHash.slice(0, 20)}...${safeHash.slice(-15)}`;
-    doc.text(`Certificate Hash: ${shortHash}`, pageWidth / 2, verificationY + 7, { align: 'center' });
-
-    // Transaction hash
-    if (txHash) {
-        const shortTxHash = `${txHash.slice(0, 20)}...${txHash.slice(-15)}`;
-        doc.text(`Transaction Hash: ${shortTxHash}`, pageWidth / 2, verificationY + 13, { align: 'center' });
+    // Validate input
+    if (!certificateData) {
+        console.error('No certificate data provided');
+        return;
     }
 
-    // Verification URL
-    doc.setFontSize(9);
-    doc.setTextColor(59, 130, 246);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Verify at: ${window.location.origin}/verify?hash=${safeHash}`, pageWidth / 2, verificationY + 20, { align: 'center' });
+    const {
+        studentName = 'Student',
+        courseName = 'Certificate',
+        institution = 'Educational Institution',
+        grade = 'N/A',
+        issueDate = new Date().toISOString().split('T')[0],
+        hash = '',
+        txHash = '',
+        status = 'Issued',
+    } = certificateData;
 
-    // === QR CODE PLACEHOLDER ===
-    // Note: For actual QR code, you'd need to generate it as base64 image
-    // For now, adding a placeholder box
-    const qrSize = 30;
-    const qrX = pageWidth / 2 - qrSize / 2;
-    const qrY = 30;
+    try {
+        // Create new PDF document (A4 Landscape)
+        const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+        });
 
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.3);
-    doc.rect(qrX, qrY, qrSize, qrSize);
-    doc.setFontSize(7);
-    doc.setTextColor(150, 150, 150);
-    doc.text('QR CODE', qrX + qrSize / 2, qrY + qrSize / 2, { align: 'center' });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
 
-    // === FOOTER ===
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.setFont('helvetica', 'italic');
-    doc.text('This certificate is secured on the blockchain and can be verified using the hash above.',
-        pageWidth / 2, pageHeight - 15, { align: 'center' });
+        // === HEADER SECTION ===
+        // Blue header bar
+        doc.setFillColor(59, 130, 246);
+        doc.rect(0, 0, pageWidth, 40, 'F');
 
-    doc.setFontSize(7);
-    doc.text('© EduBlock - Blockchain Based Degree Verification System',
-        pageWidth / 2, pageHeight - 10, { align: 'center' });
+        // Institution name
+        doc.setFontSize(24);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text(institution, pageWidth / 2, 20, { align: 'center' });
 
-    // === DOWNLOAD PDF ===
-    const safeStudentName = (studentName || 'Student').replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
-    const safeCourseName = (courseName || 'Certificate').replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
-    const fileName = `${safeStudentName}_${safeCourseName}_Certificate.pdf`;
-    doc.save(fileName);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Blockchain Verified Certificate', pageWidth / 2, 30, { align: 'center' });
+
+        // === CERTIFICATE TITLE ===
+        doc.setFontSize(32);
+        doc.setTextColor(59, 130, 246);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CERTIFICATE', pageWidth / 2, 60, { align: 'center' });
+
+        doc.setFontSize(16);
+        doc.setTextColor(100, 100, 100);
+        doc.setFont('helvetica', 'normal');
+        doc.text('OF COMPLETION', pageWidth / 2, 70, { align: 'center' });
+
+        // === DECORATIVE LINE ===
+        doc.setDrawColor(59, 130, 246);
+        doc.setLineWidth(0.5);
+        doc.line(60, 75, pageWidth - 60, 75);
+
+        // === CERTIFICATE BODY ===
+        doc.setFontSize(14);
+        doc.setTextColor(50, 50, 50);
+        doc.setFont('helvetica', 'normal');
+        doc.text('This is to certify that', pageWidth / 2, 90, { align: 'center' });
+
+        // Student name (highlighted)
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text(studentName, pageWidth / 2, 105, { align: 'center' });
+
+        // Achievement text
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(50, 50, 50);
+        doc.text('has successfully completed', pageWidth / 2, 118, { align: 'center' });
+
+        // Course name
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(59, 130, 246);
+        doc.text(courseName, pageWidth / 2, 130, { align: 'center' });
+
+        // === DETAILS SECTION ===
+        const detailsY = 145;
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(70, 70, 70);
+
+        // Grade
+        doc.text(`Grade: ${grade}`, 80, detailsY);
+
+        // Issue date - format nicely
+        let formattedDate = issueDate;
+        try {
+            formattedDate = new Date(issueDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (e) {
+            // Keep original if parsing fails
+        }
+        doc.text(`Issue Date: ${formattedDate}`, 180, detailsY);
+
+        // Status badge
+        const statusColor = status === 'Issued' ? [34, 197, 94] : [234, 179, 8];
+        doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
+        doc.roundedRect(pageWidth - 65, detailsY - 5, 30, 8, 2, 2, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text(status, pageWidth - 50, detailsY, { align: 'center' });
+
+        // === BLOCKCHAIN VERIFICATION SECTION ===
+        const verificationY = 165;
+
+        doc.setFontSize(12);
+        doc.setTextColor(59, 130, 246);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Blockchain Verification', pageWidth / 2, verificationY, { align: 'center' });
+
+        // Certificate hash
+        if (hash) {
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.setFont('courier', 'normal');
+            const displayHash = hash.length > 40 ? `${hash.slice(0, 20)}...${hash.slice(-15)}` : hash;
+            doc.text(`Certificate Hash: ${displayHash}`, pageWidth / 2, verificationY + 7, { align: 'center' });
+        }
+
+        // Transaction hash
+        if (txHash) {
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.setFont('courier', 'normal');
+            const displayTxHash = txHash.length > 40 ? `${txHash.slice(0, 20)}...${txHash.slice(-15)}` : txHash;
+            doc.text(`Transaction Hash: ${displayTxHash}`, pageWidth / 2, verificationY + 13, { align: 'center' });
+        }
+
+        // Verification URL
+        doc.setFontSize(9);
+        doc.setTextColor(59, 130, 246);
+        doc.setFont('helvetica', 'normal');
+        const verifyUrl = hash ? `${window.location.origin}/verify?hash=${hash}` : `${window.location.origin}/verify`;
+        doc.text(`Verify at: ${verifyUrl}`, pageWidth / 2, verificationY + 20, { align: 'center' });
+
+        // === FOOTER ===
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.setFont('helvetica', 'italic');
+        doc.text('This certificate is secured on the blockchain and can be verified using the hash above.',
+            pageWidth / 2, pageHeight - 15, { align: 'center' });
+
+        doc.setFontSize(7);
+        doc.text('© EduBlock - Blockchain Based Degree Verification System',
+            pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+        // === GENERATE FILENAME AND DOWNLOAD ===
+        // Clean the names for filename
+        const cleanName = (str) => {
+            return str
+                .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
+                .replace(/\s+/g, '_')           // Replace spaces with underscores
+                .substring(0, 30);              // Limit length
+        };
+
+        const safeStudentName = cleanName(studentName) || 'Student';
+        const safeCourseName = cleanName(courseName) || 'Certificate';
+        const fileName = `${safeStudentName}_${safeCourseName}_Certificate.pdf`;
+
+        // Download the PDF
+        doc.save(fileName);
+
+        console.log(`PDF downloaded: ${fileName}`);
+
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        alert('Failed to generate PDF. Please try again.');
+    }
 };
 
 /**
- * Future: Add QR code to PDF
- * This function can be extended to embed actual QR code images
+ * Simple PDF download with minimal data
+ * Fallback for quick downloads
  */
-export const addQRCodeToPDF = (doc, qrCodeDataURL, x, y, size) => {
-    if (qrCodeDataURL) {
-        doc.addImage(qrCodeDataURL, 'PNG', x, y, size, size);
-    }
+export const downloadSimplePDF = (studentName, courseName) => {
+    generateCertificatePDF({
+        studentName: studentName || 'Student',
+        courseName: courseName || 'Certificate'
+    });
 };
+
+export default { generateCertificatePDF, downloadSimplePDF };

@@ -314,23 +314,22 @@ const StudentDashboard = () => {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                         <Button
                                             variant="primary"
                                             size="sm"
                                             className="w-full"
                                             onClick={() => {
                                                 setSelectedCert(cert);
-                                                setShowDetailsModal(true);
+                                                setShowQRModal(true);
                                             }}
                                         >
-                                            👁️ View Details
+                                            👁️ View QR Code
                                         </Button>
-                                        <div className="flex gap-2">
+                                        <div className="grid grid-cols-2 gap-2">
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="flex-1"
                                                 onClick={() => {
                                                     generateCertificatePDF(cert);
                                                     showNotification('PDF downloaded successfully!');
@@ -341,7 +340,6 @@ const StudentDashboard = () => {
                                             <Button
                                                 variant="secondary"
                                                 size="sm"
-                                                className="flex-1"
                                                 onClick={() => {
                                                     setSelectedCert(cert);
                                                     setShowShareModal(true);
@@ -352,7 +350,6 @@ const StudentDashboard = () => {
                                             <Button
                                                 variant="secondary"
                                                 size="sm"
-                                                className="flex-1"
                                                 onClick={() => {
                                                     navigator.clipboard.writeText(cert.hash);
                                                     showNotification('Certificate hash copied!');
@@ -363,10 +360,9 @@ const StudentDashboard = () => {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="flex-1"
                                                 onClick={() => openTransactionInExplorer(cert.txHash)}
                                             >
-                                                🔗 Blockchain
+                                                ⛓️ Chain
                                             </Button>
                                         </div>
                                     </div>
@@ -572,7 +568,7 @@ const StudentDashboard = () => {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                        className="max-w-2xl w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <Card>

@@ -13,9 +13,18 @@ const SuperAdminDashboard = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showRoleModal, setShowRoleModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showAddUserModal, setShowAddUserModal] = useState(false);
     const [selectedUniversity, setSelectedUniversity] = useState(null);
     const [notification, setNotification] = useState({ show: false, type: '', message: '' });
     const [activeTab, setActiveTab] = useState('universities'); // universities, users, deployment
+
+    // New User Form State
+    const [newUser, setNewUser] = useState({
+        name: '',
+        email: '',
+        role: 'student',
+        password: '',
+    });
 
     // User Management State
     const [users, setUsers] = useState([
@@ -180,6 +189,11 @@ const SuperAdminDashboard = () => {
                         {activeTab === 'universities' && (
                             <Button variant="primary" onClick={() => setShowAddModal(true)}>
                                 + Add University
+                            </Button>
+                        )}
+                        {activeTab === 'users' && (
+                            <Button variant="primary" onClick={() => setShowAddUserModal(true)}>
+                                + Add User
                             </Button>
                         )}
                     </div>
@@ -425,22 +439,38 @@ const SuperAdminDashboard = () => {
                                                     </td>
                                                     <td className="py-4 px-4 text-white/60 text-sm">{user.lastLogin}</td>
                                                     <td className="py-4 px-4">
-                                                        <div className="flex gap-2 justify-center">
+                                                        <div className="flex gap-2 justify-center flex-wrap">
                                                             {user.status !== 'Active' && (
                                                                 <Button
-                                                                    variant="secondary"
+                                                                    variant="outline"
                                                                     size="sm"
                                                                     onClick={() => {
                                                                         setUsers(prev => prev.map(u =>
                                                                             u.id === user.id ? { ...u, status: 'Active' } : u
                                                                         ));
-                                                                        showNotification('success', `${user.name} has been activated.`);
+                                                                        showNotification('success', `${user.name} is now Active.`);
                                                                     }}
+                                                                    className="border-green-500 text-green-400 hover:bg-green-500/10"
                                                                 >
-                                                                    Activate
+                                                                    ✓ Active
                                                                 </Button>
                                                             )}
-                                                            {user.status === 'Active' && (
+                                                            {user.status !== 'Inactive' && user.status !== 'Suspended' && (
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => {
+                                                                        setUsers(prev => prev.map(u =>
+                                                                            u.id === user.id ? { ...u, status: 'Inactive' } : u
+                                                                        ));
+                                                                        showNotification('success', `${user.name} is now Inactive.`);
+                                                                    }}
+                                                                    className="border-gray-500 text-gray-400 hover:bg-gray-500/10"
+                                                                >
+                                                                    ⦾ Inactive
+                                                                </Button>
+                                                            )}
+                                                            {user.status !== 'Suspended' && (
                                                                 <Button
                                                                     variant="outline"
                                                                     size="sm"
@@ -452,7 +482,7 @@ const SuperAdminDashboard = () => {
                                                                     }}
                                                                     className="border-orange-500 text-orange-400 hover:bg-orange-500/10"
                                                                 >
-                                                                    Suspend
+                                                                    ⏸ Suspend
                                                                 </Button>
                                                             )}
                                                             <Button
@@ -466,7 +496,7 @@ const SuperAdminDashboard = () => {
                                                                 }}
                                                                 className="border-red-500 text-red-400 hover:bg-red-500/10"
                                                             >
-                                                                Delete
+                                                                🗑 Delete
                                                             </Button>
                                                         </div>
                                                     </td>
@@ -597,20 +627,20 @@ const SuperAdminDashboard = () => {
                                             <p className="font-semibold">Auto-verify Certificates</p>
                                             <p className="text-white/60 text-sm">Automatically verify certificates after blockchain confirmation</p>
                                         </div>
-                                        <div className="relative">
-                                            <input type="checkbox" defaultChecked className="sr-only peer" id="auto-verify" />
-                                            <label htmlFor="auto-verify" className="w-11 h-6 bg-white/20 rounded-full peer-checked:bg-emerald-500 cursor-pointer block transition-colors"></label>
-                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                                            <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                        </label>
                                     </div>
                                     <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
                                         <div>
                                             <p className="font-semibold">Email Notifications</p>
                                             <p className="text-white/60 text-sm">Send email notifications for important events</p>
                                         </div>
-                                        <div className="relative">
-                                            <input type="checkbox" defaultChecked className="sr-only peer" id="email-notif" />
-                                            <label htmlFor="email-notif" className="w-11 h-6 bg-white/20 rounded-full peer-checked:bg-emerald-500 cursor-pointer block transition-colors"></label>
-                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                                            <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                        </label>
                                     </div>
                                 </div>
                             </Card>
@@ -745,11 +775,15 @@ const SuperAdminDashboard = () => {
 
                     {/* Add University Modal */}
                     {showAddModal && (
-                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                            onClick={() => setShowAddModal(false)}
+                        >
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="max-w-md w-full"
+                                onClick={(e) => e.stopPropagation()}
                             >
                                 <Card>
                                     <div className="flex justify-between items-center mb-6">
@@ -842,11 +876,15 @@ const SuperAdminDashboard = () => {
 
                     {/* Edit University Modal */}
                     {showEditModal && (
-                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                            onClick={() => setShowEditModal(false)}
+                        >
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="max-w-md w-full"
+                                onClick={(e) => e.stopPropagation()}
                             >
                                 <Card>
                                     <div className="flex justify-between items-center mb-6">
@@ -925,11 +963,15 @@ const SuperAdminDashboard = () => {
 
                     {/* Assign Role Modal */}
                     {showRoleModal && (
-                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                            onClick={() => setShowRoleModal(false)}
+                        >
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="max-w-md w-full"
+                                onClick={(e) => e.stopPropagation()}
                             >
                                 <Card>
                                     <div className="flex justify-between items-center mb-6">
@@ -1006,6 +1048,125 @@ const SuperAdminDashboard = () => {
                                             </Button>
                                             <Button type="submit" variant="primary" className="flex-1">
                                                 Assign Role
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </Card>
+                            </motion.div>
+                        </div>
+                    )}
+
+                    {/* Add User Modal */}
+                    {showAddUserModal && (
+                        <div
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                            onClick={() => setShowAddUserModal(false)}
+                        >
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="max-w-md w-full"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <Card>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-2xl font-bold">Add New User</h2>
+                                        <button
+                                            onClick={() => setShowAddUserModal(false)}
+                                            className="text-white/60 hover:text-white"
+                                        >
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            if (newUser.name && newUser.email) {
+                                                setUsers(prev => [...prev, {
+                                                    id: Date.now(),
+                                                    name: newUser.name,
+                                                    email: newUser.email,
+                                                    role: newUser.role,
+                                                    status: 'Active',
+                                                    lastLogin: 'Never'
+                                                }]);
+                                                showNotification('success', `User ${newUser.name} added successfully!`);
+                                                setNewUser({ name: '', email: '', role: 'student', password: '' });
+                                                setShowAddUserModal(false);
+                                            }
+                                        }}
+                                        className="space-y-4"
+                                    >
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                Full Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={newUser.name}
+                                                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                                                placeholder="Enter full name"
+                                                className="input-field w-full"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                Email Address
+                                            </label>
+                                            <input
+                                                type="email"
+                                                value={newUser.email}
+                                                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                                                placeholder="user@example.com"
+                                                className="input-field w-full"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                Role
+                                            </label>
+                                            <select
+                                                value={newUser.role}
+                                                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                                                className="input-field w-full"
+                                            >
+                                                <option value="student">Student</option>
+                                                <option value="admin">Admin</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2 text-white/80">
+                                                Password
+                                            </label>
+                                            <input
+                                                type="password"
+                                                value={newUser.password}
+                                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                                placeholder="Create password"
+                                                className="input-field w-full"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="flex gap-3 pt-4">
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                onClick={() => setShowAddUserModal(false)}
+                                                className="flex-1"
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit" variant="primary" className="flex-1">
+                                                Add User
                                             </Button>
                                         </div>
                                     </form>

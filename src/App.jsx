@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import FloatingBackground from './components/FloatingBackground';
+import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing';
 import Verification from './pages/Verification';
 import AdminDashboard from './pages/AdminDashboard';
@@ -68,18 +69,20 @@ function App() {
           walletAddress={walletAddress}
           onConnectWallet={connectWallet}
         />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/verify" element={<Verification />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/student" element={<StudentDashboard />} />
-          <Route path="/superadmin" element={<SuperAdminDashboard />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/contact" element={<ContactUs />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/verify" element={<Verification />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/student" element={<StudentDashboard />} />
+            <Route path="/superadmin" element={<SuperAdminDashboard />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/contact" element={<ContactUs />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </ErrorBoundary>
       </div>
     </Router>
   );

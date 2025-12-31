@@ -256,6 +256,17 @@ const Verification = () => {
                                                 {shareCopied ? '✅ Copied!' : '📤 Share Result'}
                                             </Button>
                                         </div>
+
+                                        <Button
+                                            variant="outline"
+                                            className="w-full mt-4"
+                                            onClick={() => {
+                                                setResult(null);
+                                                setCertificateId('');
+                                            }}
+                                        >
+                                            🔄 Verify Another Certificate
+                                        </Button>
                                     </div>
                                 )}
 

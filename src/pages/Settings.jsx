@@ -323,7 +323,7 @@ EduBlock Team`
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="max-w-2xl w-full max-h-[90vh] overflow-y-auto overflow-x-hidden"
+                            className="max-w-2xl w-full"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <Card>
