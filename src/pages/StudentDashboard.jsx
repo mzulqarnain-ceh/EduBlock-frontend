@@ -5,6 +5,7 @@ import Button from '../components/Button';
 import Card from '../components/Card';
 import { generateCertificatePDF } from '../utils/pdfGenerator';
 import { openTransactionInExplorer } from '../utils/blockchain';
+import { mockCertificates } from '../data/certificates';
 
 const StudentDashboard = () => {
     const [showQRModal, setShowQRModal] = useState(false);
@@ -86,45 +87,11 @@ const StudentDashboard = () => {
         setShowProfileModal(false);
     };
 
-    // Mock certificates data with transaction details
-    const certificates = [
-        {
-            id: 1,
-            studentName: user?.name || 'Student User',
-            courseName: 'Blockchain Development',
-            institution: 'Tech University',
-            grade: 'A+',
-            issueDate: '2025-01-15',
-            hash: '0xabcd1234ef567890abcd1234ef567890abcd1234ef567890abcd1234ef567890',
-            txHash: '0x7f8c9d2e1a3b4c5f6789abcdef012345678901234567890abcdef01234567890',
-            status: 'Issued',
-            txStatus: 'Confirmed',
-        },
-        {
-            id: 2,
-            studentName: user?.name || 'Student User',
-            courseName: 'Smart Contract Security',
-            institution: 'Crypto Academy',
-            grade: 'A',
-            issueDate: '2024-12-10',
-            hash: '0xefgh5678ij901234klmn5678opqr9012stuv3456wxyz7890abcd1234efgh5678',
-            txHash: '0x9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b',
-            status: 'Issued',
-            txStatus: 'Confirmed',
-        },
-        {
-            id: 3,
-            studentName: user?.name || 'Student User',
-            courseName: 'Web3 Development',
-            institution: 'Tech University',
-            grade: 'A-',
-            issueDate: '2024-11-20',
-            hash: '0xijkl9012mnop3456qrst7890uvwx1234yz567890abcd1234efgh5678ijkl9012',
-            txHash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-            status: 'Pending',
-            txStatus: 'Pending',
-        },
-    ];
+    // Get certificates from shared data source, updating student name from user
+    const certificates = mockCertificates.map(cert => ({
+        ...cert,
+        studentName: user?.name || cert.studentName,
+    }));
 
     // Filter and sort certificates
     const filteredCertificates = certificates
@@ -735,96 +702,102 @@ const StudentDashboard = () => {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="max-w-lg w-full max-h-[90vh] overflow-y-auto"
+                        className="w-full max-w-md"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <Card>
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-bold">👤 My Profile</h2>
+                        <Card className="p-4 sm:p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-bold">👤 My Profile</h2>
                                 <button
                                     onClick={() => setShowProfileModal(false)}
-                                    className="text-white/60 hover:text-white"
+                                    className="text-white/60 hover:text-white p-1"
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
                             </div>
 
-                            {/* Profile Picture Section */}
-                            <div className="flex flex-col items-center mb-6">
-                                <div className="w-24 h-24 bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full flex items-center justify-center text-4xl mb-4">
+                            {/* Profile Picture Section - Compact */}
+                            <div className="flex items-center gap-4 mb-4 pb-4 border-b border-white/10">
+                                <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full flex items-center justify-center text-2xl flex-shrink-0">
                                     {profileData.name ? profileData.name.charAt(0).toUpperCase() : '👤'}
                                 </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => showNotification('Photo upload feature coming soon!')}
-                                >
-                                    📷 Change Photo
-                                </Button>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold truncate">{profileData.name || 'Student'}</p>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="mt-1 text-xs px-2 py-1"
+                                        onClick={() => showNotification('Photo upload coming soon!')}
+                                    >
+                                        📷 Change Photo
+                                    </Button>
+                                </div>
                             </div>
 
-                            {/* Profile Form */}
-                            <div className="space-y-4">
+                            {/* Profile Form - Compact */}
+                            <div className="space-y-3">
                                 <div>
-                                    <label className="block text-white/60 text-sm mb-1">Full Name</label>
+                                    <label className="block text-white/60 text-xs mb-1">Full Name</label>
                                     <input
                                         type="text"
                                         value={profileData.name}
                                         onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                                        className="input-field w-full"
+                                        className="input-field w-full py-2 text-sm"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-white/60 text-sm mb-1">Email</label>
+                                    <label className="block text-white/60 text-xs mb-1">Email</label>
                                     <input
                                         type="email"
                                         value={profileData.email}
                                         onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                                        className="input-field w-full"
+                                        className="input-field w-full py-2 text-sm"
                                     />
                                 </div>
 
-                                <div className="border-t border-white/10 pt-4 mt-4">
-                                    <h3 className="font-semibold mb-3">🔐 Change Password</h3>
-                                    <div className="space-y-3">
+                                <div className="border-t border-white/10 pt-3">
+                                    <h3 className="font-semibold text-sm mb-2">🔐 Change Password</h3>
+                                    <div className="space-y-2">
                                         <input
                                             type="password"
                                             placeholder="Current Password"
                                             value={profileData.currentPassword}
                                             onChange={(e) => setProfileData({ ...profileData, currentPassword: e.target.value })}
-                                            className="input-field w-full"
+                                            className="input-field w-full py-2 text-sm"
                                         />
                                         <input
                                             type="password"
                                             placeholder="New Password"
                                             value={profileData.newPassword}
                                             onChange={(e) => setProfileData({ ...profileData, newPassword: e.target.value })}
-                                            className="input-field w-full"
+                                            className="input-field w-full py-2 text-sm"
                                         />
                                         <input
                                             type="password"
                                             placeholder="Confirm New Password"
                                             value={profileData.confirmPassword}
                                             onChange={(e) => setProfileData({ ...profileData, confirmPassword: e.target.value })}
-                                            className="input-field w-full"
+                                            className="input-field w-full py-2 text-sm"
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="flex gap-3 mt-6">
+                            <div className="flex gap-2 mt-4">
                                 <Button
                                     variant="primary"
                                     className="flex-1"
+                                    size="sm"
                                     onClick={handleUpdateProfile}
                                 >
-                                    💾 Save Changes
+                                    💾 Save
                                 </Button>
                                 <Button
                                     variant="outline"
+                                    size="sm"
                                     onClick={() => setShowProfileModal(false)}
                                 >
                                     Cancel

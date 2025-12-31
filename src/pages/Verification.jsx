@@ -5,6 +5,7 @@ import Card from '../components/Card';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { openTransactionInExplorer } from '../utils/blockchain';
 import { generateCertificatePDF } from '../utils/pdfGenerator';
+import { verifyCertificate } from '../data/certificates';
 
 const Verification = () => {
     const [certificateId, setCertificateId] = useState('');
@@ -26,61 +27,13 @@ const Verification = () => {
         setResult(null);
 
         try {
-            // Simulate blockchain verification (replace with actual blockchain call)
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            // Simulate blockchain verification delay
+            await new Promise((resolve) => setTimeout(resolve, 1500));
 
-            // Check if certificate ID looks valid (starts with 0x for blockchain hashes)
-            const isValidFormat = certificateId.startsWith('0x') && certificateId.length >= 10;
+            // Use the centralized verification function
+            const verificationResult = verifyCertificate(certificateId.trim());
+            setResult(verificationResult);
 
-            // Mock different scenarios based on input
-            if (!isValidFormat) {
-                // Invalid format
-                setResult({
-                    valid: false,
-                    errorType: 'invalid_format',
-                    message: 'Invalid certificate ID format. Please check the ID and try again.',
-                });
-            } else if (certificateId.includes('revoked')) {
-                // Revoked certificate
-                setResult({
-                    valid: false,
-                    errorType: 'revoked',
-                    message: 'This certificate has been revoked by the issuing institution.',
-                    revokeDate: '2025-01-20',
-                    revokeReason: 'Fraudulent application',
-                });
-            } else if (certificateId.includes('expired')) {
-                // Expired certificate
-                setResult({
-                    valid: false,
-                    errorType: 'expired',
-                    message: 'This certificate has expired.',
-                    expiryDate: '2024-12-31',
-                });
-            } else if (certificateId.toLowerCase().includes('pending')) {
-                // Pending certificate
-                setResult({
-                    valid: false,
-                    errorType: 'pending',
-                    message: 'This certificate transaction is pending confirmation on the blockchain.',
-                    details: 'Please check back in a few minutes.'
-                });
-            } else {
-                // Valid certificate
-                // Generate a pseudo-random txHash based on the certificate ID so it looks unique
-                const dynamicTxHash = certificateId.replace('0x', '0x7f8c9') + 'abcdef123456789';
-
-                setResult({
-                    valid: true,
-                    studentName: 'John Doe',
-                    courseName: 'Blockchain Development',
-                    issueDate: '2025-01-15',
-                    institution: 'Tech University',
-                    grade: 'A+',
-                    hash: certificateId,
-                    txHash: dynamicTxHash.substring(0, 66), // Ensure it's not too long
-                });
-            }
         } catch (err) {
             setError('Network error. Please check your connection and try again.');
         } finally {
@@ -164,7 +117,7 @@ const Verification = () => {
                                     value={certificateId}
                                     onChange={(e) => setCertificateId(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && handleVerify()}
-                                    placeholder="Enter certificate ID or hash"
+                                    placeholder="Enter certificate ID or hash (e.g., 0xabcd1234...)"
                                     className="input-field w-full"
                                 />
                                 {error && (
@@ -204,7 +157,7 @@ const Verification = () => {
                             transition={{ duration: 0.5 }}
                         >
                             <Card className="relative overflow-hidden">
-                                {/* Success Badge */}
+                                {/* Status Badge */}
                                 <div className="absolute top-0 right-0 m-4">
                                     {result.valid ? (
                                         <div className="flex items-center gap-2 bg-green-500/20 border border-green-500 rounded-full px-4 py-2">
@@ -212,6 +165,13 @@ const Verification = () => {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                             </svg>
                                             <span className="text-green-400 font-semibold">Verified</span>
+                                        </div>
+                                    ) : result.errorType === 'pending' ? (
+                                        <div className="flex items-center gap-2 bg-amber-500/20 border border-amber-500 rounded-full px-4 py-2">
+                                            <svg className="w-5 h-5 text-amber-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span className="text-amber-400 font-semibold">Pending</span>
                                         </div>
                                     ) : (
                                         <div className="flex items-center gap-2 bg-red-500/20 border border-red-500 rounded-full px-4 py-2">
@@ -320,6 +280,37 @@ const Verification = () => {
                                             <p className="text-white/60 max-w-md mx-auto">{result.message}</p>
                                         </div>
 
+                                        {/* Show pending certificate details if available */}
+                                        {result.errorType === 'pending' && result.certificate && (
+                                            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 space-y-3">
+                                                <h3 className="font-semibold text-amber-400">Certificate Details (Pending Confirmation)</h3>
+                                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                                    <div>
+                                                        <span className="text-white/60">Course:</span>
+                                                        <span className="ml-2">{result.certificate.courseName}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-white/60">Institution:</span>
+                                                        <span className="ml-2">{result.certificate.institution}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-white/60">Grade:</span>
+                                                        <span className="ml-2">{result.certificate.grade}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-white/60">Issue Date:</span>
+                                                        <span className="ml-2">{result.certificate.issueDate}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="pt-2 border-t border-amber-500/20">
+                                                    <span className="text-white/60 text-xs">Transaction Hash (Pending):</span>
+                                                    <p className="font-mono text-xs text-amber-400 break-all mt-1">
+                                                        {result.certificate.txHash}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* Additional Details for specific error types */}
                                         {result.errorType === 'revoked' && (
                                             <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 space-y-2">
@@ -363,9 +354,10 @@ const Verification = () => {
                                                 )}
                                                 {result.errorType === 'not_found' && (
                                                     <>
-                                                        <li>• Double-check the certificate ID</li>
-                                                        <li>• The certificate may still be processing on blockchain</li>
-                                                        <li>• Contact the issuing institution</li>
+                                                        <li>• Double-check the certificate ID for typos</li>
+                                                        <li>• Ensure you copied the complete hash</li>
+                                                        <li>• The certificate may not exist in our records</li>
+                                                        <li>• Contact the issuing institution for verification</li>
                                                     </>
                                                 )}
                                                 {result.errorType === 'revoked' && (

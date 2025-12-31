@@ -7,9 +7,30 @@ const Navigation = ({ walletAddress, onConnectWallet }) => {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [user, setUser] = useState(null);
     const [scrolled, setScrolled] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        const saved = localStorage.getItem('theme');
+        return saved ? saved === 'dark' : true; // Default to dark
+    });
     const userMenuRef = useRef(null);
     const location = useLocation();
     const navigate = useNavigate();
+
+    // Apply theme to document
+    useEffect(() => {
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.add('light');
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    }, [isDarkMode]);
+
+    const toggleTheme = () => {
+        setIsDarkMode(!isDarkMode);
+    };
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -131,8 +152,25 @@ const Navigation = ({ walletAddress, onConnectWallet }) => {
                             Contact
                         </Link>
 
+                        {/* Theme Toggle Button */}
+                        <button
+                            onClick={toggleTheme}
+                            className="ml-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber-500/30 transition-all duration-300"
+                            title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                        >
+                            {isDarkMode ? (
+                                <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            ) : (
+                                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                            )}
+                        </button>
+
                         {user ? (
-                            <div className="flex items-center gap-3 ml-4">
+                            <div className="flex items-center gap-3 ml-2">
                                 {/* Connect Wallet button for students */}
                                 {user.role === 'student' && (
                                     <Button
