@@ -7,6 +7,7 @@ const Navigation = ({ walletAddress, onConnectWallet }) => {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [user, setUser] = useState(null);
     const [scrolled, setScrolled] = useState(false);
+    const [activeSection, setActiveSection] = useState('');
     const userMenuRef = useRef(null);
     const location = useLocation();
     const navigate = useNavigate();
@@ -21,10 +22,29 @@ const Navigation = ({ walletAddress, onConnectWallet }) => {
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
+
+            // Track active section on home page
+            if (location.pathname === '/') {
+                const sections = ['faq', 'how-it-works', 'features'];
+                let found = '';
+                for (const sectionId of sections) {
+                    const element = document.getElementById(sectionId);
+                    if (element) {
+                        const rect = element.getBoundingClientRect();
+                        if (rect.top <= 200 && rect.bottom >= 200) {
+                            found = sectionId;
+                            break;
+                        }
+                    }
+                }
+                setActiveSection(found);
+            } else {
+                setActiveSection('');
+            }
         };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    }, [location.pathname]);
 
     // Close user menu when clicking outside
     useEffect(() => {
@@ -47,9 +67,23 @@ const Navigation = ({ walletAddress, onConnectWallet }) => {
 
     const isActive = (path) => location.pathname === path;
 
+    const isSectionActive = (sectionId) => {
+        return location.pathname === '/' && activeSection === sectionId;
+    };
+
     const navLinkClass = (path) => {
         const baseClass = "relative px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg";
-        const activeClass = isActive(path)
+        // Don't highlight Home when a section is active
+        const active = isActive(path) && !(path === '/' && activeSection);
+        const activeClass = active
+            ? "text-amber-400 bg-amber-500/10 after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-8 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-emerald-500 after:rounded-full"
+            : "text-white/70 hover:text-white hover:bg-white/5";
+        return `${baseClass} ${activeClass}`;
+    };
+
+    const sectionLinkClass = (sectionId) => {
+        const baseClass = "relative px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg cursor-pointer";
+        const activeClass = isSectionActive(sectionId)
             ? "text-amber-400 bg-amber-500/10 after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-8 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-emerald-500 after:rounded-full"
             : "text-white/70 hover:text-white hover:bg-white/5";
         return `${baseClass} ${activeClass}`;
@@ -64,13 +98,8 @@ const Navigation = ({ walletAddress, onConnectWallet }) => {
 
     const scrollToSection = (sectionId) => {
         if (location.pathname !== '/') {
-            navigate('/');
-            setTimeout(() => {
-                const element = document.getElementById(sectionId);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 100);
+            // Navigate to home with state telling ScrollToTop to scroll to section
+            navigate('/', { state: { scrollToSection: sectionId } });
         } else {
             const element = document.getElementById(sectionId);
             if (element) {
@@ -81,7 +110,7 @@ const Navigation = ({ walletAddress, onConnectWallet }) => {
     };
 
     return (
-        <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
+        <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled || isOpen
             ? 'bg-black/80 backdrop-blur-xl border-b border-white/10 shadow-2xl'
             : 'bg-transparent'
             }`}>
@@ -100,16 +129,16 @@ const Navigation = ({ walletAddress, onConnectWallet }) => {
                         <Link to="/" className={navLinkClass('/')}>
                             Home
                         </Link>
-                        <button onClick={() => scrollToSection('features')} className={`${navLinkClass('')} cursor-pointer`}>
+                        <button onClick={() => scrollToSection('features')} className={sectionLinkClass('features')}>
                             Features
                         </button>
-                        <button onClick={() => scrollToSection('how-it-works')} className={`${navLinkClass('')} cursor-pointer`}>
+                        <button onClick={() => scrollToSection('how-it-works')} className={sectionLinkClass('how-it-works')}>
                             How It Works
                         </button>
                         <Link to="/verify" className={navLinkClass('/verify')}>
                             Verify
                         </Link>
-                        <button onClick={() => scrollToSection('faq')} className={`${navLinkClass('')} cursor-pointer`}>
+                        <button onClick={() => scrollToSection('faq')} className={sectionLinkClass('faq')}>
                             FAQ
                         </button>
                         {user && user.role === 'superadmin' && (
@@ -233,8 +262,16 @@ const Navigation = ({ walletAddress, onConnectWallet }) => {
                     </button>
                 </div>
 
+                {/* Mobile Menu Overlay - click outside to close */}
+                {isOpen && (
+                    <div
+                        className="md:hidden fixed inset-0 top-20 z-40"
+                        onClick={() => setIsOpen(false)}
+                    />
+                )}
+
                 {/* Mobile Menu */}
-                <div className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out relative z-50 ${isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
                     <div className="py-6 space-y-2 border-t border-white/10">
                         <Link to="/" className="block text-white/80 hover:text-white hover:bg-white/5 transition-all duration-200 py-3 px-4 rounded-lg" onClick={() => setIsOpen(false)}>
                             Home
@@ -274,10 +311,10 @@ const Navigation = ({ walletAddress, onConnectWallet }) => {
                             </div>
                         ) : (
                             <div className="flex gap-3 pt-4">
-                                <Link to="/login" className="flex-1">
+                                <Link to="/login" className="flex-1" onClick={() => setIsOpen(false)}>
                                     <Button variant="secondary" size="sm" className="w-full">Login</Button>
                                 </Link>
-                                <Link to="/signup" className="flex-1">
+                                <Link to="/signup" className="flex-1" onClick={() => setIsOpen(false)}>
                                     <Button variant="primary" size="sm" className="w-full">Sign Up</Button>
                                 </Link>
                             </div>

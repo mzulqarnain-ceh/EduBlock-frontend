@@ -179,9 +179,9 @@ const SuperAdminDashboard = () => {
                     transition={{ duration: 0.6 }}
                 >
                     {/* Header */}
-                    <div className="flex justify-between items-center mb-8">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                         <div>
-                            <h1 className="text-4xl font-bold mb-2">
+                            <h1 className="text-3xl sm:text-4xl font-bold mb-2">
                                 Super Admin <span className="gradient-text">Dashboard</span>
                             </h1>
                             <p className="text-white/60">Manage universities and system settings</p>
@@ -199,10 +199,10 @@ const SuperAdminDashboard = () => {
                     </div>
 
                     {/* Tab Navigation */}
-                    <div className="flex gap-2 mb-8">
+                    <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
                         <button
                             onClick={() => setActiveTab('universities')}
-                            className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'universities'
+                            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === 'universities'
                                 ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-black'
                                 : 'bg-white/5 text-white/70 hover:bg-white/10'
                                 }`}
@@ -211,7 +211,7 @@ const SuperAdminDashboard = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('users')}
-                            className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'users'
+                            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === 'users'
                                 ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-black'
                                 : 'bg-white/5 text-white/70 hover:bg-white/10'
                                 }`}
@@ -220,7 +220,7 @@ const SuperAdminDashboard = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('settings')}
-                            className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'settings'
+                            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === 'settings'
                                 ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-black'
                                 : 'bg-white/5 text-white/70 hover:bg-white/10'
                                 }`}
@@ -229,7 +229,7 @@ const SuperAdminDashboard = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('analytics')}
-                            className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'analytics'
+                            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === 'analytics'
                                 ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-black'
                                 : 'bg-white/5 text-white/70 hover:bg-white/10'
                                 }`}
@@ -364,18 +364,18 @@ const SuperAdminDashboard = () => {
                         <Card>
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                                 <h2 className="text-2xl font-bold">User Management</h2>
-                                <div className="flex gap-3">
+                                <div className="flex flex-col sm:flex-row gap-3">
                                     <input
                                         type="text"
                                         placeholder="Search by name or email..."
                                         value={userSearch}
                                         onChange={(e) => setUserSearch(e.target.value)}
-                                        className="input-field w-64"
+                                        className="input-field w-full sm:w-64"
                                     />
                                     <select
                                         value={userRoleFilter}
                                         onChange={(e) => setUserRoleFilter(e.target.value)}
-                                        className="input-field w-32"
+                                        className="input-field w-full sm:w-32"
                                     >
                                         <option value="all">All Roles</option>
                                         <option value="student">Student</option>
@@ -384,7 +384,7 @@ const SuperAdminDashboard = () => {
                                     <select
                                         value={userStatusFilter}
                                         onChange={(e) => setUserStatusFilter(e.target.value)}
-                                        className="input-field w-32"
+                                        className="input-field w-full sm:w-32"
                                     >
                                         <option value="all">All Status</option>
                                         <option value="Active">Active</option>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
+import ScrollToTop from './components/ScrollToTop';
 import FloatingBackground from './components/FloatingBackground';
 import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing';
@@ -62,6 +63,9 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen relative">
+        {/* Scroll to top on route change */}
+        <ScrollToTop />
+
         {/* Floating Educational Background */}
         <FloatingBackground />
 

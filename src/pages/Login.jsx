@@ -1,19 +1,29 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Button from '../components/Button';
 import Card from '../components/Card';
 
 const Login = ({ onLogin }) => {
+    const [searchParams] = useSearchParams();
+    const roleFromUrl = searchParams.get('role');
+
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        role: 'student', // student, admin, superadmin
+        role: roleFromUrl || 'student',
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+
+    // Update role if URL param changes
+    useEffect(() => {
+        if (roleFromUrl && ['student', 'admin', 'superadmin'].includes(roleFromUrl)) {
+            setFormData(prev => ({ ...prev, role: roleFromUrl }));
+        }
+    }, [roleFromUrl]);
 
     // Test accounts with proper validation
     const validAccounts = [

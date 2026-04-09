@@ -146,13 +146,20 @@ const AdminDashboard = () => {
     });
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
-    const [activeTab, setActiveTab] = useState('issue'); // 'issue' or 'certificates'
+    const [activeTab, setActiveTab] = useState('issue'); // 'issue', 'certificates', 'pending', 'audit', 'bulk'
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [notification, setNotification] = useState({ show: false, type: '', message: '' });
     const [showRevokeModal, setShowRevokeModal] = useState(false);
     const [selectedCert, setSelectedCert] = useState(null);
     const [revokeReason, setRevokeReason] = useState('');
+
+    // Bulk Upload State
+    const [csvData, setCsvData] = useState([]);
+    const [csvFileName, setCsvFileName] = useState('');
+    const [bulkUploading, setBulkUploading] = useState(false);
+    const [bulkProgress, setBulkProgress] = useState(0);
+    const [dragOver, setDragOver] = useState(false);
 
     // Mock issued certificates data
     const [issuedCertificates, setIssuedCertificates] = useState([
@@ -325,6 +332,102 @@ const AdminDashboard = () => {
         }
     };
 
+    // CSV Parsing
+    const parseCSV = (text) => {
+        const lines = text.trim().split('\n');
+        if (lines.length < 2) return [];
+
+        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+        const rows = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+            if (values.length === headers.length) {
+                const row = {};
+                headers.forEach((header, idx) => {
+                    row[header] = values[idx];
+                });
+                rows.push(row);
+            }
+        }
+        return rows;
+    };
+
+    const handleCSVUpload = (file) => {
+        if (!file || !file.name.endsWith('.csv')) {
+            showNotification('error', 'Please upload a valid .csv file');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e.target.result;
+            const parsed = parseCSV(text);
+            if (parsed.length === 0) {
+                showNotification('error', 'CSV file is empty or invalid format');
+                return;
+            }
+            setCsvData(parsed);
+            setCsvFileName(file.name);
+            showNotification('success', `${parsed.length} records loaded from CSV`);
+        };
+        reader.readAsText(file);
+    };
+
+    const handleFileDrop = (e) => {
+        e.preventDefault();
+        setDragOver(false);
+        const file = e.dataTransfer.files[0];
+        handleCSVUpload(file);
+    };
+
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        handleCSVUpload(file);
+    };
+
+    const handleBulkMint = async () => {
+        setBulkUploading(true);
+        setBulkProgress(0);
+
+        for (let i = 0; i < csvData.length; i++) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            const row = csvData[i];
+            const mockHash = '0x' + Math.random().toString(16).substr(2, 64);
+            const mockTxHash = '0x' + Math.random().toString(16).substr(2, 64);
+
+            const newCert = {
+                id: Date.now() + i,
+                studentName: row['Student Name'] || row['studentName'] || 'Unknown',
+                studentId: row['Student ID'] || row['studentId'] || `STU-BULK-${i + 1}`,
+                degreeName: row['Degree Name'] || row['degreeName'] || 'Unknown',
+                issueDate: row['Issue Date'] || row['issueDate'] || new Date().toISOString().split('T')[0],
+                status: 'Issued',
+                hash: mockHash,
+                txHash: mockTxHash,
+            };
+            setIssuedCertificates(prev => [newCert, ...prev]);
+            setBulkProgress(Math.round(((i + 1) / csvData.length) * 100));
+        }
+
+        showNotification('success', `${csvData.length} certificates minted successfully!`);
+        setCsvData([]);
+        setCsvFileName('');
+        setBulkUploading(false);
+        setBulkProgress(0);
+    };
+
+    const downloadSampleCSV = () => {
+        const csvContent = `Student Name,Student ID,Degree Name,Issue Date\nJohn Doe,STU-2024-001,BS Computer Science,2025-01-15\nJane Smith,STU-2024-002,BS Data Science,2025-01-14\nMike Johnson,STU-2024-003,BS Electrical Engineering,2025-01-13`;
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'sample_certificates.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="min-h-screen pt-32 pb-20">
             <div className="container-custom">
@@ -334,9 +437,9 @@ const AdminDashboard = () => {
                     transition={{ duration: 0.6 }}
                 >
                     {/* Header */}
-                    <div className="flex justify-between items-center mb-8">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                         <div>
-                            <h1 className="text-4xl font-bold mb-2">
+                            <h1 className="text-3xl sm:text-4xl font-bold mb-2">
                                 Admin <span className="gradient-text">Dashboard</span>
                             </h1>
                             <p className="text-white/50">Issue and manage certificates</p>
@@ -344,10 +447,10 @@ const AdminDashboard = () => {
                     </div>
 
                     {/* Tab Navigation */}
-                    <div className="flex gap-2 mb-8">
+                    <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
                         <button
                             onClick={() => setActiveTab('issue')}
-                            className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'issue'
+                            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === 'issue'
                                 ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-black'
                                 : 'bg-white/5 text-white/70 hover:bg-white/10'
                                 }`}
@@ -356,7 +459,7 @@ const AdminDashboard = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('certificates')}
-                            className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'certificates'
+                            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === 'certificates'
                                 ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-black'
                                 : 'bg-white/5 text-white/70 hover:bg-white/10'
                                 }`}
@@ -365,7 +468,7 @@ const AdminDashboard = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('pending')}
-                            className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'pending'
+                            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === 'pending'
                                 ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-black'
                                 : 'bg-white/5 text-white/70 hover:bg-white/10'
                                 }`}
@@ -374,12 +477,21 @@ const AdminDashboard = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('audit')}
-                            className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'audit'
+                            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === 'audit'
                                 ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-black'
                                 : 'bg-white/5 text-white/70 hover:bg-white/10'
                                 }`}
                         >
                             📊 Audit Log
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('bulk')}
+                            className={`px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === 'bulk'
+                                ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-black'
+                                : 'bg-white/5 text-white/70 hover:bg-white/10'
+                                }`}
+                        >
+                            📤 Bulk Upload
                         </button>
                     </div>
 
@@ -420,7 +532,7 @@ const AdminDashboard = () => {
                                         <h2 className="text-2xl font-bold">Issue New Certificate</h2>
                                     </div>
                                     <form onSubmit={handleSubmit} className="space-y-6">
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label htmlFor="studentName" className="block text-sm font-medium mb-2 text-white/70">
                                                     Student Name
@@ -516,7 +628,7 @@ const AdminDashboard = () => {
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label htmlFor="grade" className="block text-sm font-medium mb-2 text-white/70">
                                                     Grade / CGPA
@@ -665,18 +777,18 @@ const AdminDashboard = () => {
                         <Card>
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                                 <h2 className="text-2xl font-bold">Issued Certificates</h2>
-                                <div className="flex gap-3">
+                                <div className="flex flex-col sm:flex-row gap-3">
                                     <input
                                         type="text"
                                         placeholder="Search by name, ID, degree..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="input-field w-64"
+                                        className="input-field w-full sm:w-64"
                                     />
                                     <select
                                         value={statusFilter}
                                         onChange={(e) => setStatusFilter(e.target.value)}
-                                        className="input-field w-40"
+                                        className="input-field w-full sm:w-40"
                                     >
                                         <option value="all">All Status</option>
                                         <option value="Issued">Issued</option>
@@ -896,6 +1008,162 @@ const AdminDashboard = () => {
                                 </Button>
                             </div>
                         </Card>
+                    )}
+
+                    {/* Bulk Upload Tab */}
+                    {activeTab === 'bulk' && (
+                        <div className="space-y-6">
+                            <Card className="border-white/10 hover:border-amber-500/20">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-emerald-500 rounded-lg flex items-center justify-center">
+                                            <span className="text-xl">📤</span>
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-bold">Bulk Issue Certificates</h2>
+                                            <p className="text-white/50 text-sm">Upload a CSV file to issue multiple certificates at once</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={downloadSampleCSV}
+                                        className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-amber-400 hover:bg-white/10 hover:border-amber-500/30 transition-all text-sm font-medium"
+                                    >
+                                        📥 Download Sample CSV
+                                    </button>
+                                </div>
+
+                                {/* Drop Zone */}
+                                <div
+                                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                                    onDragLeave={() => setDragOver(false)}
+                                    onDrop={handleFileDrop}
+                                    className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 cursor-pointer ${dragOver
+                                        ? 'border-amber-500 bg-amber-500/10'
+                                        : csvFileName
+                                            ? 'border-emerald-500/50 bg-emerald-500/5'
+                                            : 'border-white/20 hover:border-white/40 hover:bg-white/5'
+                                        }`}
+                                    onClick={() => document.getElementById('csvFileInput').click()}
+                                >
+                                    <input
+                                        id="csvFileInput"
+                                        type="file"
+                                        accept=".csv"
+                                        onChange={handleFileSelect}
+                                        className="hidden"
+                                    />
+                                    {csvFileName ? (
+                                        <div>
+                                            <span className="text-5xl block mb-4">✅</span>
+                                            <p className="text-emerald-400 font-semibold text-lg">{csvFileName}</p>
+                                            <p className="text-white/50 mt-2">{csvData.length} records loaded</p>
+                                            <p className="text-white/30 text-sm mt-2">Click or drop to replace</p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <span className="text-5xl block mb-4">📁</span>
+                                            <p className="text-white/70 font-semibold text-lg">Drag & Drop your CSV file here</p>
+                                            <p className="text-white/40 mt-2">or click to browse files</p>
+                                            <p className="text-white/30 text-sm mt-4">Supported format: .csv</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* CSV Format Info */}
+                                <div className="mt-6 p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                                    <p className="text-amber-400 text-sm font-medium mb-2">📋 Required CSV Format:</p>
+                                    <code className="text-white/60 text-xs block bg-black/30 p-3 rounded-lg font-mono">
+                                        Student Name, Student ID, Degree Name, Issue Date
+                                    </code>
+                                </div>
+                            </Card>
+
+                            {/* Preview Table */}
+                            {csvData.length > 0 && (
+                                <Card className="border-white/10 hover:border-amber-500/20">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                                        <h3 className="text-xl font-bold">📋 Preview ({csvData.length} records)</h3>
+                                        <div className="flex gap-3">
+                                            <Button
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={() => { setCsvData([]); setCsvFileName(''); }}
+                                            >
+                                                ❌ Clear
+                                            </Button>
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
+                                                onClick={handleBulkMint}
+                                                disabled={bulkUploading}
+                                            >
+                                                {bulkUploading ? (
+                                                    <span className="flex items-center gap-2">
+                                                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                        </svg>
+                                                        Minting... {bulkProgress}%
+                                                    </span>
+                                                ) : (
+                                                    `⛓️ Mint All (${csvData.length})`
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    {/* Progress Bar */}
+                                    {bulkUploading && (
+                                        <div className="mb-6">
+                                            <div className="h-3 bg-white/5 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${bulkProgress}%` }}
+                                                    className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full"
+                                                    transition={{ duration: 0.3 }}
+                                                />
+                                            </div>
+                                            <p className="text-white/50 text-sm mt-2 text-center">
+                                                Processing {Math.round((bulkProgress / 100) * csvData.length)} of {csvData.length} certificates
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className="border-b border-white/10">
+                                                    <th className="text-left py-3 px-4 text-white/60 text-sm">#</th>
+                                                    {Object.keys(csvData[0]).map((header) => (
+                                                        <th key={header} className="text-left py-3 px-4 text-white/60 text-sm">
+                                                            {header}
+                                                        </th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {csvData.slice(0, 20).map((row, index) => (
+                                                    <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                                        <td className="py-3 px-4 text-white/40 text-sm">{index + 1}</td>
+                                                        {Object.values(row).map((value, vIndex) => (
+                                                            <td key={vIndex} className="py-3 px-4 text-white/80 text-sm">
+                                                                {value}
+                                                            </td>
+                                                        ))}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {csvData.length > 20 && (
+                                        <p className="text-center text-white/40 text-sm mt-4">
+                                            Showing first 20 of {csvData.length} records
+                                        </p>
+                                    )}
+                                </Card>
+                            )}
+                        </div>
                     )}
                 </motion.div>
             </div>

@@ -1,11 +1,25 @@
 import React, { useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Button from '../components/Button';
 import Card from '../components/Card';
 
 const Landing = () => {
     const faqRef = useRef(null);
+    const navigate = useNavigate();
+
+    // Handle Issue Certificate button click
+    const handleIssueCertificate = () => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const user = JSON.parse(storedUser);
+            if (user.role === 'admin') {
+                navigate('/admin');
+                return;
+            }
+        }
+        navigate('/login?role=admin');
+    };
     const features = [
         {
             icon: '🔒',
@@ -195,11 +209,11 @@ const Landing = () => {
                                     </svg>
                                 </Button>
                             </Link>
-                            <Link to="/login">
+                            <button onClick={handleIssueCertificate}>
                                 <Button variant="secondary" size="lg">
                                     Issue Certificate
                                 </Button>
-                            </Link>
+                            </button>
                         </motion.div>
                     </motion.div>
 
@@ -435,13 +449,13 @@ const Landing = () => {
                             variants={fadeInUp}
                             className="flex flex-col sm:flex-row gap-4 justify-center"
                         >
-                            <Link to="/login">
+                            <button onClick={handleIssueCertificate}>
                                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                     <Button variant="primary" size="lg">
                                         Issue Your First Certificate
                                     </Button>
                                 </motion.div>
-                            </Link>
+                            </button>
                             <Link to="/verify">
                                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                     <Button variant="outline" size="lg">
